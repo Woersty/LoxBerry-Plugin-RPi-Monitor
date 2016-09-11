@@ -1,0 +1,27 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          RPi-Monitor
+# Required-Start:    $remote_fs $syslog $network 
+# Required-Stop:     $remote_fs $syslog $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: This file starts the Loxberry RPi-Monitor update
+# Description:       This file starts the Loxberry RPi-Monitor update.
+### END INIT INFO
+
+. /lib/lsb/init-functions
+
+### END INIT INFO
+
+# Version 1.0
+# 11.09.2016 20:41:41
+
+/etc/init.d/rpimonitor update
+if [ $? -eq 1 ] 
+	then
+    log_action_msg "Error running '/etc/init.d/rpimonitor update'"
+		exit 1
+	else
+    log_action_msg "/etc/init.d/rpimonitor update executed"
+		exit 0
+	fi

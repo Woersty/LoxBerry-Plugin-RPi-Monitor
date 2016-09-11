@@ -1,0 +1,16 @@
+									<iframe id="rpi_frame" name="rpi_frame" frameBorder=0 src="<!--$rpi_monitor_url-->"></iframe>
+									<script type="application/javascript">
+												function resize_rpi_frame()
+												{
+													var content_div  = document.getElementsByClassName("ui-content");
+													content_div.height  = $(window.top).height() - 190;
+													content_div.width   = $(window.top).width() - 70;
+													var iFrame = document.getElementById( 'rpi_frame' )
+										    	iFrame.width  = content_div.width;
+										    	iFrame.height = content_div.height;
+										  }
+										  resize_rpi_frame();
+									</script>
+									<center>
+										<a id="btncancel" data-role="button" data-inline="true" data-mini="true" data-icon="check" href="/admin/index.cgi">OK</a>
+									</center>

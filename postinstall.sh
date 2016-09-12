@@ -39,5 +39,9 @@ ARGV4=$4 # Forth argument is Plugin version
 ARGV5=$5 # Fifth argument is Base folder of LoxBerry
 #echo "<INFO> Base folder is: $ARGV5"
 
+echo "<INFO> ******************************************"
+echo "<INFO> * Please reboot to start the RPi-Monitor *"
+echo "<INFO> *********************************"********"
+
 # Exit with Status 0
 exit 0

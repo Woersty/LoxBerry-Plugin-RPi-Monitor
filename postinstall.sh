@@ -41,7 +41,7 @@ ARGV5=$5 # Fifth argument is Base folder of LoxBerry
 
 echo "<INFO> ******************************************"
 echo "<INFO> * Please reboot to start the RPi-Monitor *"
-echo "<INFO> *********************************"********"
+echo "<INFO> ******************************************"
 
 # Exit with Status 0
 exit 0

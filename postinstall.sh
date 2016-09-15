@@ -46,34 +46,21 @@ PATHTODATA=$ARGV5/data/plugins/$ARGV3
 
 # VM Detection
 RPi_or_not=`cat /proc/cpuinfo|grep "model name"|grep "ARM"|wc -l`
-if [ -z ${RPi_or_not+x} ]
-then 
-  	echo "<INFO> *************************************************************"
-   	echo "<INFO> * Can not detect the hardware. Please be informed, that the *"
-	  echo "<INFO> * RPi Monitor is not fully working on a virtualized Machine *"
-	  echo "<INFO> * Don't forget to reboot your system to run the RPi-Monitor *"
-	  echo "<INFO> *************************************************************"
-   	echo "<INFO> * Kann die Hardware nicht erkennen. Bitte beachte, dass das *"
-	  echo "<INFO> * RPi Monitor Tool nicht zu 100% zu virtuellen Systemen kom-*"
-	  echo "<INFO> * patibel ist. Bitte vergiss den Neustart des Systems nicht.*"
-	  echo "<INFO> *************************************************************"
-else 
-	if [ "$RPi_or_not" -eq 0 ]
-	then
-  	echo "<INFO> *************************************************************"
-	  echo "<INFO> * RPi Monitor is not fully working on a virtualized Machine *"
-	  echo "<INFO> * Don't forget to reboot your system to run the RPi-Monitor *"
-	  echo "<INFO> *************************************************************"
-	  echo "<INFO> * Das RPi Monitor Tool nicht zu 100% zu virtuellen Systemen *"
-	  echo "<INFO> * kompatibel. Bitte vergiss den Neustart des Systems nicht. *"
-	  echo "<INFO> *************************************************************"
-  else
-  	echo "<INFO> ******************************************"
-	  echo "<INFO> * Please reboot to start the RPi-Monitor *"
-	  echo "<INFO> ******************************************"
-	  echo "<INFO> * Bitte mache einen Neustart des Systems.*"
-	  echo "<INFO> ******************************************"
-  fi
+if [ "$RPi_or_not" -eq 0 ]
+then
+	echo "<INFO> *************************************************************"
+  echo "<INFO> * RPi Monitor is not fully working on a virtualized Machine *"
+  echo "<INFO> * Don't forget to reboot your system to run the RPi-Monitor *"
+  echo "<INFO> *************************************************************"
+  echo "<INFO> * Das RPi Monitor Tool nicht zu 100% zu virtuellen Systemen *"
+  echo "<INFO> * kompatibel. Bitte vergiss den Neustart des Systems nicht. *"
+  echo "<INFO> *************************************************************"
+else
+	echo "<INFO> ******************************************"
+  echo "<INFO> * Please reboot to start the RPi-Monitor *"
+  echo "<INFO> ******************************************"
+  echo "<INFO> * Bitte mache einen Neustart des Systems.*"
+  echo "<INFO> ******************************************"
 fi
 
 # Exit with Status 0

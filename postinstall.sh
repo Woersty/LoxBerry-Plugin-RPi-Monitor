@@ -44,9 +44,27 @@ touch $DOINSTALLFILE
 PATHTODATA=$ARGV5/data/plugins/$ARGV3
 /bin/sed -i "s:REPLACEBYPATHTODATA:$PATHTODATA:" $ARGV5/system/daemons/plugins/$ARGV2
 
-echo "<INFO> ******************************************"
-echo "<INFO> * Please reboot to start the RPi-Monitor *"
-echo "<INFO> ******************************************"
+# VM Detection
+RPi_or_not=`cat /proc/cpuinfo|grep "model name"|grep "ARM"|wc -l`
+if [ -z ${RPi_or_not+x} ]
+then 
+  	echo "<INFO> *************************************************************"
+   	echo "<INFO> * Can not detect the Hardware. Please be informed, that the *"
+	  echo "<INFO> * RPi Monitor is not fully working on a virtualized Machine *"
+	  echo "<INFO> * In any case you must reboot to start the RPi-Monitor      *"
+	  echo "<INFO> *************************************************************"
+else 
+	if [[ "$RPi_or_not" == 0 ]]
+	then
+  	echo "<INFO> *************************************************************"
+	  echo "<INFO> * RPi Monitor is not fully working on a virtualized Machine *"
+	  echo "<INFO> * In any case you must reboot to start the RPi-Monitor      *"
+	  echo "<INFO> *************************************************************"
+  else
+  	echo "<INFO> ******************************************"
+	  echo "<INFO> * Please reboot to start the RPi-Monitor *"
+	  echo "<INFO> ******************************************"
+  fi
 
 # Exit with Status 0
 exit 0

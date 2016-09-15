@@ -1,1 +1,6 @@
-rpimonitor 
+dpkg-dev
+librrds-perl
+libhttp-daemon-perl
+libjson-perl
+libipc-sharelite-perl
+libfile-which-perl

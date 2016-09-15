@@ -13,24 +13,14 @@
 
 ### END INIT INFO
 
-# Version 1.3
-# 15.09.2016 00:02:36
+# Version 1.1
+# 15.09.2016 15:14:00
 
-# Prepare System Monitoring Tools
-if [ -e /etc/apt/sources.list.d/rpimonitor.list ]
-then
-	log_action_begin_msg "/etc/apt/sources.list.d/rpimonitor.list seems available, skipping download"
-else
-	log_action_begin_msg "/etc/apt/sources.list.d/rpimonitor.list not found, try to download"
-	wget -T 2 http://goo.gl/vewCLL -O /etc/apt/sources.list.d/rpimonitor.list
-	apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 2C0D3C0F 
-fi
-
-# If System Monitoring Tools installed, enable autoupdate when reboot
-if [ -e /etc/init.d/rpimonitor  ]
-then
-   log_action_msg "Error running '/etc/init.d/rpimonitor update'"
-	/etc/init.d/rpimonitor install_auto_package_status_update 
-fi
-
-exit 0
+if [ -f REPLACEBYPATHTODATA/doinstall ]
+	then
+    log_action_msg "Fresh installation. Installing RPiMonitor package"
+    dpkg -i REPLACEBYPATHTODATA/rpimonitor_latest_all.deb
+    cp REPLACEBYPATHTODATA/data.conf /etc/rpimonitor/
+    cp REPLACEBYPATHTODATA/version.conf /etc/rpimonitor/template/
+    rm REPLACEBYPATHTODATA/doinstall
+	fi

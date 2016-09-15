@@ -39,6 +39,11 @@ ARGV4=$4 # Forth argument is Plugin version
 ARGV5=$5 # Fifth argument is Base folder of LoxBerry
 #echo "<INFO> Base folder is: $ARGV5"
 
+DOINSTALLFILE=$ARGV5/data/plugins/$ARGV3/doinstall
+touch $DOINSTALLFILE
+PATHTODATA=$ARGV5/data/plugins/$ARGV3
+/bin/sed -i "s:REPLACEBYPATHTODATA:$PATHTODATA:" $ARGV5/system/daemons/plugins/$ARGV2
+
 echo "<INFO> ******************************************"
 echo "<INFO> * Please reboot to start the RPi-Monitor *"
 echo "<INFO> ******************************************"

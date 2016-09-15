@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Bashscript which is executed by bash *AFTER* deinstallation
+# Could be used to do things in the system after deinstallation
+# of plugin.
+#
+# Exit code must be 0 if executed successfull.
+#
+# Will be executed as user "root".
+#
+/usr/bin/apt-get -y purge rpimonitor
+rm -rf /etc/rpimonitor

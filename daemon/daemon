@@ -13,15 +13,14 @@
 
 ### END INIT INFO
 
-# Version 1.0
-# 11.09.2016 20:41:41
+# Version 1.1
+# 15.09.2016 15:14:00
 
-/etc/init.d/rpimonitor update
-if [ $? -eq 1 ] 
+if [ -f REPLACEBYPATHTODATA/doinstall ]
 	then
-    log_action_msg "Error running '/etc/init.d/rpimonitor update'"
-		exit 1
-	else
-    log_action_msg "/etc/init.d/rpimonitor update executed"
-		exit 0
+    log_action_msg "Fresh installation. Installing RPiMonitor package"
+    dpkg -i REPLACEBYPATHTODATA/rpimonitor_latest_all.deb
+    cp REPLACEBYPATHTODATA/data.conf /etc/rpimonitor/
+    cp REPLACEBYPATHTODATA/version.conf /etc/rpimonitor/template/
+    rm REPLACEBYPATHTODATA/doinstall
 	fi

@@ -65,6 +65,7 @@ else
 	  echo "<INFO> * Please reboot to start the RPi-Monitor *"
 	  echo "<INFO> ******************************************"
   fi
+fi
 
 # Exit with Status 0
 exit 0

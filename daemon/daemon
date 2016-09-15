@@ -25,5 +25,5 @@ if [ -f REPLACEBYPATHTODATA/doinstall ]
     rm REPLACEBYPATHTODATA/doinstall
 	fi
 
-/etc/init.d/rpimonitor update 
+/etc/init.d/rpimonitor install_auto_package_status_update
 exit 0

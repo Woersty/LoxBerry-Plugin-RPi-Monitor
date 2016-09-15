@@ -54,7 +54,7 @@ then
 	  echo "<INFO> * In any case you must reboot to start the RPi-Monitor      *"
 	  echo "<INFO> *************************************************************"
 else 
-	if [[ "$RPi_or_not" == 0 ]]
+	if [ "$RPi_or_not" == 0 ]
 	then
   	echo "<INFO> *************************************************************"
 	  echo "<INFO> * RPi Monitor is not fully working on a virtualized Machine *"

@@ -24,3 +24,6 @@ if [ -f REPLACEBYPATHTODATA/doinstall ]
     cp REPLACEBYPATHTODATA/version.conf /etc/rpimonitor/template/
     rm REPLACEBYPATHTODATA/doinstall
 	fi
+
+/etc/init.d/rpimonitor update 
+exit 0

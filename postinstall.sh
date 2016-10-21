@@ -42,7 +42,7 @@ ARGV5=$5 # Fifth argument is Base folder of LoxBerry
 DOINSTALLFILE=$ARGV5/data/plugins/$ARGV3/doinstall
 touch $DOINSTALLFILE
 PATHTODATA=$ARGV5/data/plugins/$ARGV3
-/bin/sed -i "s:REPLACEBYPATHTODATA:$PATHTODATA:" $ARGV5/system/daemons/plugins/$ARGV2
+/bin/sed -i "s#REPLACEBYPATHTODATA#$PATHTODATA#" $ARGV5/system/daemons/plugins/$ARGV2
 
 # VM Detection
 RPi_or_not=`cat /proc/cpuinfo|grep "model name"|grep "ARM"|wc -l`

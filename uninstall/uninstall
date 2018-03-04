@@ -8,5 +8,9 @@
 #
 # Will be executed as user "root".
 #
+systemctl stop rpimonitor
 /usr/bin/apt-get -y purge rpimonitor
+rm -rf REPLACELBPDATADIR
 rm -rf /etc/rpimonitor
+/usr/bin/apt-get -y autoremove 
+

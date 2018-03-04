@@ -8,6 +8,7 @@
 #
 # Will be executed as user "root".
 #
+/etc/init.d/rpimonitor remove_auto_package_status_update
 systemctl stop rpimonitor
 /usr/bin/apt-get -y purge rpimonitor
 rm -rf REPLACELBPDATADIR

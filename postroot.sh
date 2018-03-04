@@ -20,5 +20,6 @@ chown -R loxberry /etc/rpimonitor/template
 chgrp -R loxberry /etc/rpimonitor/template
 set +x
 /etc/init.d/rpimonitor update 
+/etc/init.d/rpimonitor install_auto_package_status_update
 systemctl restart rpimonitor 
 exit 0

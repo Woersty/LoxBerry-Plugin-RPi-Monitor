@@ -124,7 +124,7 @@ $cfg             = new Config::Simple("$installfolder/config/plugins/$psubfolder
 		# Print Template
 		&lbheader;
 		
-		our $rpi_monitor_url = "http://".$ENV{'HTTP_HOST'}.":8888/"; 
+		our $rpi_monitor_url = "http://".$ENV{'SERVER_NAME'}.":8888/"; 
 	
 		open(F,"$installfolder/templates/plugins/$psubfolder/$lang/settings.html") || die "Missing template plugins/$psubfolder/$lang/settings.html";
 		  while (<F>) 

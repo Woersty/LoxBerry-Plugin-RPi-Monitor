@@ -4,3 +4,4 @@ libhttp-daemon-perl
 libjson-perl
 libipc-sharelite-perl
 libfile-which-perl
+libsnmp-extension-passpersist-perl 

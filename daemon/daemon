@@ -12,9 +12,40 @@
 PATH="/sbin:/bin:/usr/sbin:/usr/bin:REPLACELBHOMEDIR/bin"
 PATH=$PATH.":REPLACELBHOMEDIR/sbin"
 
+. /lib/lsb/init-functions
+. $LBHOMEDIR/libs/bashlib/loxberry_log.sh
+. $LBHOMEDIR/libs/bashlib/iniparser.sh 
+
+PACKAGE=rpi_monitor
+NAME=BASH-DAEMON
+FILENAME=${LBPLOG}/${PACKAGE}/RPi-Monitor_daemon.log
+APPEND=1
+LOGSTART "RPi-Monitor daemon process started."
+CONFIGFILE="/etc/rpimonitor/daemon.conf"
+PLUGIN_CONFIG=${LBPCONFIG}/${PACKAGE}/RPi-Monitor.cfg
+RPiMonitorDPORT=8888 # Default port, if value is not readable from config file 
+
+iniparser $PLUGIN_CONFIG "RPiMonitor"
+LOGINF "Port $RPiMonitorDPORT is configured."
+echo "Port $RPiMonitorDPORT is configured."
 if [ -e /usr/share/rpimonitor/scripts/updatePackagesStatus.pl ]
 then
  /usr/share/rpimonitor/scripts/updatePackagesStatus.pl
 fi
 
+if [ -r $CONFIGFILE ]
+then
+  sed -i -e "s%^daemon.logfile.*%daemon.logfile=$FILENAME%"   $CONFIGFILE
+  sed -i -e "s%#daemon.port=.*%daemon.port=$RPiMonitorDPORT%" $CONFIGFILE
+  sed -i -e "s%^daemon.port.*%daemon.port=$RPiMonitorDPORT%"  $CONFIGFILE
+fi
+
+LOGDEB `systemctl restart rpimonitor 2>&1`
+
+# Make log usable for user loxberry
+if [ -e $FILENAME ]
+then
+ chown loxberry:loxberry $FILENAME >/dev/null 2>&1 
+fi
+LOGEND "RPi-Monitor daemon process finished."
 exit 0

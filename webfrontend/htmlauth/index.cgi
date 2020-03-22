@@ -33,8 +33,8 @@ use strict;
 no  strict "refs"; 
 
 # Variables
-my @pluginconfig_strings 		= ('PORT');
-my $PORT="8888";
+our @pluginconfig_strings 		= ('DPORT');
+our $DPORT="8888";
 my $maintemplatefilename 		= "rpi_monitor.html";
 my $errortemplatefilename 		= "error.html";
 my $successtemplatefilename 	= "success.html";
@@ -46,7 +46,7 @@ my $template_title;
 my $no_error_template_message	= "<b>RPi-Monitor:</b> The error template is not readable. We must abort here. Please try to reinstall the plugin.";
 my $version 					= LoxBerry::System::pluginversion();
 my $helpurl 					= "http://www.loxwiki.eu/display/LOXBERRY/RPi-Monitor";
-my $log 						= LoxBerry::Log->new ( name => 'RPi-Monitor', filename => $lbplogdir ."/". $logfile, append => 1 );
+my $log 							= LoxBerry::Log->new ( name => 'RPi-Monitor', filename => $lbplogdir ."/". $logfile, append => 1 );
 my $plugin_cfg 					= new Config::Simple($lbpconfigdir . "/" . $pluginconfigfile);
 my %Config 						= $plugin_cfg->vars() if ( $plugin_cfg );
 our $error_message				= "";
@@ -65,7 +65,6 @@ $version = "2020.03.22";
 my $plugin = LoxBerry::System::plugindata();
 
 
-LOGSTART "New admin call." if $plugin->{PLUGINDB_LOGLEVEL} eq 7;
 $LoxBerry::System::DEBUG 	= 1 if $plugin->{PLUGINDB_LOGLEVEL} eq 7;
 $LoxBerry::Web::DEBUG 		= 1 if $plugin->{PLUGINDB_LOGLEVEL} eq 7;
 $log->loglevel($plugin->{PLUGINDB_LOGLEVEL});
@@ -142,7 +141,7 @@ my $maintemplate = HTML::Template->new(
 LOGDEB "Read main strings from " . $languagefile . " for language " . $lang;
 my %L = LoxBerry::System::readlanguage($maintemplate, $languagefile);
 
-LOGSTART $L{'LOGMESSAGES.PLUGIN_CALL_START'} if $plugin->{PLUGINDB_LOGLEVEL} gt 4;
+LOGSTART $L{'LOGMESSAGES.PLUGIN_CALL_START'};
 
 LOGDEB "Check if plugin config file is readable";
 if (!-r $lbpconfigdir . "/" . $pluginconfigfile) 
@@ -154,7 +153,7 @@ if (!-r $lbpconfigdir . "/" . $pluginconfigfile)
 	LOGDEB "Try to create a default config";
 	$error_message = $ERR{'ERRORS.ERR_CREATE CONFIG_FILE'};
 	open my $configfileHandle, ">", $lbpconfigdir . "/" . $pluginconfigfile or &error;
-		print $configfileHandle "[RPi-Monitor]\nPORT=".$PORT."\n\n";
+		print $configfileHandle "[RPiMonitor]\nDPORT=".$DPORT."\n\n";
 	close $configfileHandle;
 	LOGWARN "Default config created. Display error anyway to force a page reload";
 	$error_message = $ERR{'ERRORS.ERR_NO_CONFIG_FILE'};
@@ -164,17 +163,17 @@ if (!-r $lbpconfigdir . "/" . $pluginconfigfile)
 LOGDEB "Parsing valid config variables into the maintemplate";
 foreach my $config_value (@pluginconfig_strings)
 {
-	${$config_value} = $Config{'RPi-Monitor.' . $config_value};
+	${$config_value} = $Config{'RPiMonitor.' . $config_value};
 	if (defined ${$config_value} && ${$config_value} ne '') 
 	{
-		LOGDEB "Set config variable: " . $config_value . " to " . ${$config_value};
+  		LOGDEB "Set config variable: " . $config_value . " to " . ${$config_value};
   		$maintemplate->param($config_value	, ${$config_value} );
 	}                                  	                             
 	else
 	{
-		LOGWARN "Config variable: " . $config_value . " missing or empty.";     
+	  	LOGWARN "Config variable: " . $config_value . " missing or empty.";     
   		$maintemplate->param($config_value	, "");
-	}	                                                                
+	}
 }    
 $maintemplate->param( "LBPPLUGINDIR" , $lbpplugindir);
 
@@ -189,17 +188,17 @@ sub defaultpage
 {
 	LOGDEB "Sub defaultpage";
 	LOGDEB "Set page title, load header, parse variables, set footer, end";
-	$template_title = $L{'RPI-Monitor.MY_NAME'};
+	$template_title = $L{'RPIMonitor.MY_NAME'};
 	LoxBerry::Web::lbheader($template_title, $helpurl, $helptemplatefilename);
-	$maintemplate->param( "rpi_monitor_url"		, "http://".$ENV{'HTTP_HOST'}.":".$PORT."/");
+	$maintemplate->param( "rpi_monitor_url"		, "http://".$ENV{'HTTP_HOST'}.":".$DPORT."/");
 	$maintemplate->param("HTMLPATH" => "/plugins/".$lbpplugindir."/");
 	$maintemplate->param( "VERSION"			, $version);
   $maintemplate->param( "LOGLEVEL" 				, $plugin->{PLUGINDB_LOGLEVEL});
 	$maintemplate->param( "PLUGINDB_MD5_CHECKSUM"	, $plugin->{PLUGINDB_MD5_CHECKSUM});
 	$lbplogdir =~ s/$lbhomedir\/log\///; # Workaround due to missing variable for Logview
 	$maintemplate->param( "LOGFILE" , $lbplogdir . "/" . $logfile );
-	LOGDEB "Check for pending notifications for: " . $lbpplugindir . " " . $L{'RPI-Monitor.MY_NAME'};
-	my $notifications = LoxBerry::Log::get_notifications_html($lbpplugindir, $L{'RPI-Monitor.MY_NAME'});
+	LOGDEB "Check for pending notifications for: " . $lbpplugindir . " " . $L{'RPIMonitor.MY_NAME'};
+	my $notifications = LoxBerry::Log::get_notifications_html($lbpplugindir, $L{'RPIMonitor.MY_NAME'});
 	LOGDEB "Notifications are:\n".encode_entities($notifications) if $notifications;
 	LOGDEB "No notifications pending." if !$notifications;
   $maintemplate->param( "NOTIFICATIONS" , $notifications);

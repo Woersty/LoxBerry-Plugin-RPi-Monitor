@@ -177,7 +177,7 @@ foreach my $config_value (@pluginconfig_strings)
 }    
 $maintemplate->param( "LBPPLUGINDIR" , $lbpplugindir);
 
-LOGDEB "Call default page";
+LOGINF "Call default page";
 &defaultpage;
 
 #####################################################

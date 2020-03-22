@@ -19,180 +19,203 @@
 # Modules
 ##########################################################################
 
+use LoxBerry::System;
+use LoxBerry::Web;
+use LoxBerry::Log;
+use MIME::Base64;
+use List::MoreUtils 'true','minmax';
+use HTML::Entities;
 use CGI::Carp qw(fatalsToBrowser);
 use CGI qw/:standard/;
-use Config::Simple;
-use File::HomeDir;
-use Cwd 'abs_path';
+use Config::Simple '-strict';
 use warnings;
 use strict;
-no strict "refs"; # we need it for template system
+no  strict "refs"; 
 
-
-##########################################################################
 # Variables
-##########################################################################
+my @pluginconfig_strings 		= ('PORT');
+my $PORT="8888";
+my $maintemplatefilename 		= "rpi_monitor.html";
+my $errortemplatefilename 		= "error.html";
+my $successtemplatefilename 	= "success.html";
+my $helptemplatefilename		= "help.html";
+my $pluginconfigfile 			= "RPi-Monitor.cfg";
+my $languagefile 				= "language.ini";
+my $logfile 					= "RPi-Monitor.log";
+my $template_title;
+my $no_error_template_message	= "<b>RPi-Monitor:</b> The error template is not readable. We must abort here. Please try to reinstall the plugin.";
+my $version 					= LoxBerry::System::pluginversion();
+my $helpurl 					= "http://www.loxwiki.eu/display/LOXBERRY/RPi-Monitor";
+my $log 						= LoxBerry::Log->new ( name => 'RPi-Monitor', filename => $lbplogdir ."/". $logfile, append => 1 );
+my $plugin_cfg 					= new Config::Simple($lbpconfigdir . "/" . $pluginconfigfile);
+my %Config 						= $plugin_cfg->vars() if ( $plugin_cfg );
+our $error_message				= "";
 
-our $cfg;
-our $phrase;
-our $namef;
-our $value;
-our %query;
-our $lang;
-our $template_title;
-our $help;
-our @help;
-our $helptext;
-our $helplink;
-our $installfolder;
-our $languagefile;
-our $version;
-our $error;
-our $saveformdata=0;
-our $output;
-our $message;
-our $nexturl;
-our $do="form";
-my  $home = File::HomeDir->my_home;
-our $psubfolder;
-our $pname;
-our $verbose;
-our $debug;
-our $maxfiles;
-our $languagefileplugin;
-our $phraseplugin;
-our $header_already_sent=0;
-our $plugin_title;
+# Logging
+my $plugin = LoxBerry::System::plugindata();
+
 ##########################################################################
 # Read Settings
 ##########################################################################
 
 # Version of this script
-$version = "0.1";
+$version = "2020.03.22";
 
-# Figure out in which subfolder we are installed
-$psubfolder = abs_path($0);
-$psubfolder =~ s/(.*)\/(.*)\/(.*)$/$2/g;
+# Logging
+my $plugin = LoxBerry::System::plugindata();
 
-$cfg             = new Config::Simple("$home/config/system/general.cfg");
-$installfolder   = $cfg->param("BASE.INSTALLFOLDER");
-$lang            = $cfg->param("BASE.LANG");
-$cfg             = new Config::Simple("$installfolder/config/plugins/$psubfolder/RPi-Monitor.cfg");
+LOGSTART "New admin call."      if $plugin->{PLUGINDB_LOGLEVEL} eq 7;
+$LoxBerry::System::DEBUG 	= 1 if $plugin->{PLUGINDB_LOGLEVEL} eq 7;
+$LoxBerry::Web::DEBUG 		= 1 if $plugin->{PLUGINDB_LOGLEVEL} eq 7;
+$log->loglevel($plugin->{PLUGINDB_LOGLEVEL});
 
-#########################################################################
-# Parameter
-#########################################################################
+LOGDEB "Init CGI and import names in namespace R::";
+my $cgi 	= CGI->new;
+$cgi->import_names('R');
 
+LOGDEB "Get language";
+my $lang	= lblanguage();
+LOGDEB "Resulting language is: " . $lang;
 
-# Init Language
-	# Clean up lang variable
-	$lang         =~ tr/a-z//cd; $lang         = substr($lang,0,2);
-  # If there's no language phrases file for choosed language, use german as default
-		if (!-e "$installfolder/templates/system/$lang/language.dat") 
-		{
-  		$lang = "de";
-	}
-	# Read translations / phrases
-		$languagefile 			= "$installfolder/templates/system/$lang/language.dat";
-		$phrase 						= new Config::Simple($languagefile);
-		$languagefileplugin = "$installfolder/templates/plugins/$psubfolder/$lang/language.dat";
-		$phraseplugin 			= new Config::Simple($languagefileplugin);
-		$plugin_title       = $phraseplugin->param("TXT0001");
-
-##########################################################################
-# Main program
-##########################################################################
-
-  &form;
+LOGDEB "Check, if filename for the errortemplate is readable";
+stat($lbptemplatedir . "/" . $errortemplatefilename);
+if ( !-r _ )
+{
+	LOGDEB "Filename for the errortemplate is not readable, that's bad";
+	$error_message = $no_error_template_message;
+	LoxBerry::Web::lbheader($template_title, $helpurl, $helptemplatefilename);
+	print $error_message;
+	LOGCRIT $error_message;
+	LoxBerry::Web::lbfooter();
+	LOGCRIT "Leaving RPi-Monitor Plugin due to an unrecoverable error";
 	exit;
+}
 
-#####################################################
-# 
-# Subroutines
-#
-#####################################################
+LOGDEB "Filename for the errortemplate is ok, preparing template";
+my $errortemplate = HTML::Template->new(
+		filename => $lbptemplatedir . "/" . $errortemplatefilename,
+		global_vars => 1,
+		loop_context_vars => 1,
+		die_on_bad_params=> 0,
+		associate => $cgi,
+		%htmltemplate_options,
+		debug => 1,
+		);
+LOGDEB "Read error strings from " . $languagefile . " for language " . $lang;
+my %ERR = LoxBerry::System::readlanguage($errortemplate, $languagefile);
 
-#####################################################
-# Form-Sub
-#####################################################
+LOGDEB "Check, if filename for the successtemplate is readable";
+stat($lbptemplatedir . "/" . $successtemplatefilename);
+if ( !-r _ )
+{
+	LOGDEB "Filename for the successtemplate is not readable, that's bad";
+	$error_message = $ERR{'ERRORS.ERR_SUCCESS_TEMPLATE_NOT_READABLE'};
+	&error;
+}
+LOGDEB "Filename for the successtemplate is ok, preparing template";
+my $successtemplate = HTML::Template->new(
+		filename => $lbptemplatedir . "/" . $successtemplatefilename,
+		global_vars => 1,
+		loop_context_vars => 1,
+		die_on_bad_params=> 0,
+		associate => $cgi,
+		%htmltemplate_options,
+		debug => 1,
+		);
+LOGDEB "Read success strings from " . $languagefile . " for language " . $lang;
+my %SUC = LoxBerry::System::readlanguage($successtemplate, $languagefile);
 
-	sub form 
+LOGDEB "Check, if filename for the maintemplate is readable, if not raise an error";
+$error_message = $ERR{'ERRORS.ERR_MAIN_TEMPLATE_NOT_READABLE'};
+stat($lbptemplatedir . "/" . $maintemplatefilename);
+&error if !-r _;
+LOGDEB "Filename for the maintemplate is ok, preparing template";
+my $maintemplate = HTML::Template->new(
+		filename => $lbptemplatedir . "/" . $maintemplatefilename,
+		global_vars => 1,
+		loop_context_vars => 1,
+		die_on_bad_params=> 0,
+		%htmltemplate_options,
+		debug => 1
+		);
+LOGDEB "Read main strings from " . $languagefile . " for language " . $lang;
+my %L = LoxBerry::System::readlanguage($maintemplate, $languagefile);
+
+LOGDEB "Check if plugin config file is readable";
+if (!-r $lbpconfigdir . "/" . $pluginconfigfile) 
+{
+	LOGWARN "Plugin config file not readable.";
+	LOGDEB "Check if config directory exists. If not, try to create it. In case of problems raise an error";
+	$error_message = $ERR{'ERRORS.ERR_CREATE_CONFIG_DIRECTORY'};
+	mkdir $lbpconfigdir unless -d $lbpconfigdir or &error; 
+	LOGDEB "Try to create a default config";
+	$error_message = $ERR{'ERRORS.ERR_CREATE CONFIG_FILE'};
+	open my $configfileHandle, ">", $lbpconfigdir . "/" . $pluginconfigfile or &error;
+		print $configfileHandle "[RPi-Monitor]\nPORT=".$PORT."\n\n";
+	close $configfileHandle;
+	LOGWARN "Default config created. Display error anyway to force a page reload";
+	$error_message = $ERR{'ERRORS.ERR_NO_CONFIG_FILE'};
+	&error; 
+}
+
+LOGDEB "Parsing valid config variables into the maintemplate";
+foreach my $config_value (@pluginconfig_strings)
+{
+	${$config_value} = $Config{'RPi-Monitor.' . $config_value};
+	if (defined ${$config_value} && ${$config_value} ne '') 
 	{
-		if ( !$header_already_sent ) { print "Content-Type: text/html\n\n"; }
-		$template_title = $phrase->param("TXT0000") . ": " . $plugin_title;
-		
-		# Print Template
-		&lbheader;
-		
-		our $rpi_monitor_url = "http://".$ENV{'SERVER_NAME'}.":8888/"; 
-	
-		open(F,"$installfolder/templates/plugins/$psubfolder/$lang/settings.html") || die "Missing template plugins/$psubfolder/$lang/settings.html";
-		  while (<F>) 
-		  {
-		    $_ =~ s/<!--\$(.*?)-->/${$1}/g;
-		    print $_;
-		  }
-		close(F);
-		&footer;
-		exit;
-	}
-
-#####################################################
-# Error-Sub
-#####################################################
-
-	sub error 
+		LOGDEB "Set config variable: " . $config_value . " to " . ${$config_value};
+  		$maintemplate->param($config_value	, ${$config_value} );
+	}                                  	                             
+	else
 	{
-		$template_title = $phrase->param("TXT0000") . " - " . $phrase->param("TXT0028");
-		if ( !$header_already_sent ) { print "Content-Type: text/html\n\n"; }
-		&lbheader;
-		open(F,"$installfolder/templates/system/$lang/error.html") || die "Missing template system/$lang/error.html";
-    while (<F>) 
-    {
-      $_ =~ s/<!--\$(.*?)-->/${$1}/g;
-      print $_;
-    }
-		close(F);
-		&footer;
-		exit;
-	}
+		LOGWARN "Config variable: " . $config_value . " missing or empty.";     
+  		$maintemplate->param($config_value	, "");
+	}	                                                                
+}    
+$maintemplate->param( "LBPPLUGINDIR" , $lbpplugindir);
+
+LOGDEB "Call default page";
+&defaultpage;
 
 #####################################################
-# Page-Header-Sub
+# Subs
 #####################################################
 
-	sub lbheader 
-	{
-		 # Create Help page
-	  $helplink = "http://www.loxwiki.eu:80/display/LOXBERRY/RPi-Monitor";
-	  open(F,"$installfolder/templates/plugins/$psubfolder/$lang/help.html") || die "Missing template plugins/$psubfolder/$lang/help.html";
-	    @help = <F>;
-	    foreach (@help)
-	    {
-	      s/[\n\r]/ /g;
-	      $helptext = $helptext . $_;
-	    }
-	  close(F);
-	  open(F,"$installfolder/templates/system/$lang/header.html") || die "Missing template system/$lang/header.html";
-	    while (<F>) 
-	    {
-	      $_ =~ s/<!--\$(.*?)-->/${$1}/g;
-	      print $_;
-	    }
-	  close(F);
-	}
+sub defaultpage 
+{
+	LOGDEB "Sub defaultpage";
+	LOGDEB "Set page title, load header, parse variables, set footer, end";
+	$template_title = $L{'RPI-Monitor.MY_NAME'};
+	LoxBerry::Web::lbheader($template_title, $helpurl, $helptemplatefilename);
+	$maintemplate->param( "rpi_monitor_url"		, "http://".$ENV{'HTTP_HOST'}.":".$PORT."/");
+	$maintemplate->param( "VERSION"			, $version);
+	$maintemplate->param( "LOGLEVEL" 		, $L{"RPI-Monitor.LOGLEVEL".$plugin->{PLUGINDB_LOGLEVEL}});
+	$lbplogdir =~ s/$lbhomedir\/log\///; # Workaround due to missing variable for Logview
+	$maintemplate->param( "LOGFILE" , $lbplogdir . "/" . $logfile );
+	LOGDEB "Check for pending notifications for: " . $lbpplugindir . " " . $L{'RPI-Monitor.MY_NAME'};
+	my $notifications = LoxBerry::Log::get_notifications_html($lbpplugindir, $L{'RPI-Monitor.MY_NAME'});
+	LOGDEB "Notifications are:\n".encode_entities($notifications) if $notifications;
+	LOGDEB "No notifications pending." if !$notifications;
+  $maintemplate->param( "NOTIFICATIONS" , $notifications);
+  print $maintemplate->output();
+	LoxBerry::Web::lbfooter();
+	LOGDEB "Leaving RPi-Monitor Plugin normally";
+	exit;
+}
 
-#####################################################
-# Footer
-#####################################################
-
-	sub footer 
-	{
-	  open(F,"$installfolder/templates/system/$lang/footer.html") || die "Missing template system/$lang/footer.html";
-	    while (<F>) 
-	    {
-	      $_ =~ s/<!--\$(.*?)-->/${$1}/g;
-	      print $_;
-	    }
-	  close(F);
-	}
+sub error 
+{
+	LOGDEB "Sub error";
+	LOGERR $error_message;
+	LOGDEB "Set page title, load header, parse variables, set footer, end with error";
+	$template_title = $ERR{'ERRORS.MY_NAME'} . " - " . $ERR{'ERRORS.ERR_TITLE'};
+	LoxBerry::Web::lbheader($template_title, $helpurl, $helptemplatefilename);
+	$errortemplate->param('ERR_MESSAGE'		, $error_message);
+	$errortemplate->param('ERR_TITLE'		, $ERR{'ERRORS.ERR_TITLE'});
+	$errortemplate->param('ERR_BUTTON_BACK' , $ERR{'ERRORS.ERR_BUTTON_BACK'});
+	print $errortemplate->output();
+	LoxBerry::Web::lbfooter();
+	LOGDEB "Leaving RPi-Monitor Plugin with an error";
+	exit;
+}

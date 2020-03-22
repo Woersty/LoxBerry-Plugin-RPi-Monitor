@@ -35,7 +35,11 @@ fi
 
 if [ -r $CONFIGFILE ]
 then
+  LOGDEB "LOGLEVEL is $LOGLEVEL"
+  sed -i -e "s%^#daemon.logfile.*%daemon.logfile=$FILENAME%"   $CONFIGFILE
+  sed -i -e "s%^#daemon.loglevel.*%daemon.loglevel=$LOGLEVEL%"   $CONFIGFILE
   sed -i -e "s%^daemon.logfile.*%daemon.logfile=$FILENAME%"   $CONFIGFILE
+  sed -i -e "s%^daemon.loglevel.*%daemon.loglevel=$LOGLEVEL%"   $CONFIGFILE
   sed -i -e "s%#daemon.port=.*%daemon.port=$RPiMonitorDPORT%" $CONFIGFILE
   sed -i -e "s%^daemon.port.*%daemon.port=$RPiMonitorDPORT%"  $CONFIGFILE
 fi
@@ -47,5 +51,5 @@ if [ -e $FILENAME ]
 then
  chown loxberry:loxberry $FILENAME >/dev/null 2>&1 
 fi
-LOGEND "RPi-Monitor daemon process finished."
+LOGINF "RPi-Monitor daemon process finished."
 exit 0

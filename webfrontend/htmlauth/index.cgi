@@ -194,6 +194,12 @@ sub defaultpage
 	$maintemplate->param("HTMLPATH" => "/plugins/".$lbpplugindir."/");
 	$maintemplate->param( "VERSION"			, $version);
   $maintemplate->param( "LOGLEVEL" 				, $plugin->{PLUGINDB_LOGLEVEL});
+
+	if ( $plugin->{PLUGINDB_LOGLEVEL} eq 7 ) 
+	{
+		LOGWARN	$ERR{'ERRORS.WARN_LOGLEVEL'};
+		notify( $lbpplugindir, "daemon", $ERR{'ERRORS.WARN_LOGLEVEL'}, "warning");
+	}
 	$maintemplate->param( "PLUGINDB_MD5_CHECKSUM"	, $plugin->{PLUGINDB_MD5_CHECKSUM});
 	$lbplogdir =~ s/$lbhomedir\/log\///; # Workaround due to missing variable for Logview
 	$maintemplate->param( "LOGFILE" , $lbplogdir . "/" . $logfile );

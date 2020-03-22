@@ -4,7 +4,6 @@
 <!-- NOTIFICATIONS //-->
 </div>
 <iframe id="rpi_frame" scrolling="yes" name="rpi_frame" frameBorder=0 scrolling=no src="<TMPL_VAR  rpi_monitor_url>"></iframe>
-<script src="<TMPL_VAR HTMLPATH>js/jquery-ui.min.js"></script>
 <script type="application/javascript">
 	function resize_rpi_frame()
 	{
@@ -70,9 +69,8 @@ resize_rpi_frame();
 							$( document ).ready(function() 
 							{
 								$("#loglevel<TMPL_VAR PLUGINDB_MD5_CHECKSUM>-button").remove();
-								$("#loglevel<TMPL_VAR PLUGINDB_MD5_CHECKSUM>").css('display','').selectmenu( "menuWidget" );
 								$("#loglevel<TMPL_VAR PLUGINDB_MD5_CHECKSUM>").addClass( "ui-mini ui-btn ui-icon-carat-d ui-btn-icon-right ui-corner-all ui-shadow" );
-								if ( "<TMPL_VAR LOGLEVEL>" > "0"  && "<TMPL_VAR LOGLEVEL>" < "7" ) 
+								if ( "<TMPL_VAR LOGLEVEL>" > "0"  && "<TMPL_VAR LOGLEVEL>" <= "7" ) 
 								{
 									$("#loglevel<TMPL_VAR PLUGINDB_MD5_CHECKSUM>").val(7);
 								}

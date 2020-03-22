@@ -64,7 +64,8 @@ $version = "2020.03.22";
 # Logging
 my $plugin = LoxBerry::System::plugindata();
 
-LOGSTART "New admin call."      if $plugin->{PLUGINDB_LOGLEVEL} eq 7;
+
+LOGSTART "New admin call." if $plugin->{PLUGINDB_LOGLEVEL} eq 7;
 $LoxBerry::System::DEBUG 	= 1 if $plugin->{PLUGINDB_LOGLEVEL} eq 7;
 $LoxBerry::Web::DEBUG 		= 1 if $plugin->{PLUGINDB_LOGLEVEL} eq 7;
 $log->loglevel($plugin->{PLUGINDB_LOGLEVEL});
@@ -141,6 +142,8 @@ my $maintemplate = HTML::Template->new(
 LOGDEB "Read main strings from " . $languagefile . " for language " . $lang;
 my %L = LoxBerry::System::readlanguage($maintemplate, $languagefile);
 
+LOGSTART $L{'LOGMESSAGES.PLUGIN_CALL_START'} if $plugin->{PLUGINDB_LOGLEVEL} gt 4;
+
 LOGDEB "Check if plugin config file is readable";
 if (!-r $lbpconfigdir . "/" . $pluginconfigfile) 
 {
@@ -189,8 +192,10 @@ sub defaultpage
 	$template_title = $L{'RPI-Monitor.MY_NAME'};
 	LoxBerry::Web::lbheader($template_title, $helpurl, $helptemplatefilename);
 	$maintemplate->param( "rpi_monitor_url"		, "http://".$ENV{'HTTP_HOST'}.":".$PORT."/");
+	$maintemplate->param("HTMLPATH" => "/plugins/".$lbpplugindir."/");
 	$maintemplate->param( "VERSION"			, $version);
-	$maintemplate->param( "LOGLEVEL" 		, $L{"RPI-Monitor.LOGLEVEL".$plugin->{PLUGINDB_LOGLEVEL}});
+  $maintemplate->param( "LOGLEVEL" 				, $plugin->{PLUGINDB_LOGLEVEL});
+	$maintemplate->param( "PLUGINDB_MD5_CHECKSUM"	, $plugin->{PLUGINDB_MD5_CHECKSUM});
 	$lbplogdir =~ s/$lbhomedir\/log\///; # Workaround due to missing variable for Logview
 	$maintemplate->param( "LOGFILE" , $lbplogdir . "/" . $logfile );
 	LOGDEB "Check for pending notifications for: " . $lbpplugindir . " " . $L{'RPI-Monitor.MY_NAME'};
@@ -201,6 +206,7 @@ sub defaultpage
   print $maintemplate->output();
 	LoxBerry::Web::lbfooter();
 	LOGDEB "Leaving RPi-Monitor Plugin normally";
+	LOGEND;
 	exit;
 }
 
@@ -216,6 +222,5 @@ sub error
 	$errortemplate->param('ERR_BUTTON_BACK' , $ERR{'ERRORS.ERR_BUTTON_BACK'});
 	print $errortemplate->output();
 	LoxBerry::Web::lbfooter();
-	LOGDEB "Leaving RPi-Monitor Plugin with an error";
-	exit;
+	LOGERR "Leaving RPi-Monitor Plugin due to an unrecoverable error";
 }

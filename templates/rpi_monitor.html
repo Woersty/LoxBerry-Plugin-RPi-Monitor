@@ -4,6 +4,7 @@
 <!-- NOTIFICATIONS //-->
 </div>
 <iframe id="rpi_frame" scrolling="yes" name="rpi_frame" frameBorder=0 scrolling=no src="<TMPL_VAR  rpi_monitor_url>"></iframe>
+<script src="<TMPL_VAR HTMLPATH>js/jquery-ui.min.js"></script>
 <script type="application/javascript">
 	function resize_rpi_frame()
 	{
@@ -19,11 +20,88 @@
 	}
 resize_rpi_frame();
 </script>
-<div style="display:table; padding:10px; border: 1px solid black; border-radius: 5px; background-color: rgba(19,172,132,.2);">
-	<TMPL_VAR LOG.LOG_AREA> (<TMPL_VAR LOG.LOGLEVEL><TMPL_VAR LOGLEVEL>)<br>
- 		<div style="display:table-row;">
-	 			<button onclick="window.open('/admin/system/tools/logfile.cgi?logfile=<TMPL_VAR LOGFILE>&amp;header=html&amp;format=template', 'log'); return false;" id="logview" data-role="button" data-inline="true" data-mini="true"><TMPL_VAR LOG.LOG_BUTTON_VIEW></button>
- 		</div>
-</div>
+
+			<DIV style="display:inline-block; padding:5px; border: 1px solid black; border-radius: 5px; background-color: rgba(19,172,132,.2);">
+				<TMPL_VAR LOGGING.LOG_AREA>
+			<DIV style="display:table;">
+				<DIV style="display:table-row;">
+					<DIV style="display:table-cell; border-radius: 5px;">
+						<table>
+							<tr>
+								<td>
+									<TMPL_VAR LOGGING.LOG_LEVEL>
+								</td>
+								<td>
+									<select name="loglevel<TMPL_VAR PLUGINDB_MD5_CHECKSUM>" id="loglevel<TMPL_VAR PLUGINDB_MD5_CHECKSUM>" data-mini="true">
+											<option value="0"><TMPL_VAR LOGGING.LOGLEVEL0></option>
+<!--										<optgroup label="<TMPL_VAR LOGGING.LOGLEVEL_GROUP_NOTIFY>">
+											<option value="1"><TMPL_VAR LOGGING.LOGLEVEL1></option>
+											<option value="2"><TMPL_VAR LOGGING.LOGLEVEL2></option> 
+											<option value="3"><TMPL_VAR LOGGING.LOGLEVEL3></option>
+										</optgroup>
+										<optgroup label="<TMPL_VAR LOGGING.LOGLEVEL_GROUP_NORMAL>">
+											<option value="4"><TMPL_VAR LOGGING.LOGLEVEL4></option>
+											<option value="5"><TMPL_VAR LOGGING.LOGLEVEL5></option>
+										</optgroup>
+										<optgroup label="<TMPL_VAR LOGGING.LOGLEVEL_GROUP_FREAKS>">
+											<option value="6"><TMPL_VAR LOGGING.LOGLEVEL6></option>
+										</optgroup>
+										//-->
+										<optgroup label="<TMPL_VAR LOGGING.LOGLEVEL_GROUP_DEVELOPMENT>">
+											<option value="7"><TMPL_VAR LOGGING.LOGLEVEL7></option>
+										</optgroup>
+									</select>
+								</td>
+								<td>
+									<button onclick="window.open('/admin/system/logmanager.cgi?package=rpi_monitor', 'log'); return false;" id="logview" data-role="button" data-inline="true" data-mini="true"><TMPL_VAR LOGGING.LOG_MGR></button>
+								</td>
+							</tr>
+						</table>
+						<script>
+							function post_value (action, pluginmd5, value)
+							{
+								console.log("Action:", action, "Plugin-MD5:", pluginmd5, "Value:", value);
+								$.post ( '/admin/system/tools/ajax-config-handler.cgi', 
+									{ 	action: action,
+										value: value,
+										pluginmd5: pluginmd5
+									});
+							}
+							$( document ).ready(function() 
+							{
+								$("#loglevel<TMPL_VAR PLUGINDB_MD5_CHECKSUM>-button").remove();
+								$("#loglevel<TMPL_VAR PLUGINDB_MD5_CHECKSUM>").css('display','').selectmenu( "menuWidget" );
+								$("#loglevel<TMPL_VAR PLUGINDB_MD5_CHECKSUM>").addClass( "ui-mini ui-btn ui-icon-carat-d ui-btn-icon-right ui-corner-all ui-shadow" );
+								if ( "<TMPL_VAR LOGLEVEL>" > "0"  && "<TMPL_VAR LOGLEVEL>" < "7" ) 
+								{
+									$("#loglevel<TMPL_VAR PLUGINDB_MD5_CHECKSUM>").val(7);
+								}
+								else
+								{
+									$("#loglevel<TMPL_VAR PLUGINDB_MD5_CHECKSUM>").val(0);
+								}
+								$("#loglevel<TMPL_VAR PLUGINDB_MD5_CHECKSUM>").change(function()
+								{
+									var val = $(this).val();
+									console.log("Loglevel", val);
+									post_value('plugin-loglevel', '<TMPL_VAR PLUGINDB_MD5_CHECKSUM>', val); 
+								});
+							});
+						</script>
+		 			</DIV>
+				</DIV>
+			</DIV>
+		</DIV>
+			</DIV>
+
+
+
+
+
+
+
+
+
+
 <small><small><TMPL_VAR VERSION></small></small>
 	

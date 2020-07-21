@@ -2,7 +2,7 @@
 require_once "loxberry_system.php"; 
 $L						= LBSystem::readlanguage("language.ini");
 $ini_array 		= parse_ini_file ( "$lbpconfigdir/RPi-Monitor.cfg" , TRUE , INI_SCANNER_NORMAL );
-$host 				= $_SERVER["HTTP_HOST"];
+$host 				= $_SERVER["SERVER_NAME"];
 $port 				= $ini_array["RPiMonitor"]["DPORT"];
 $connection 	= @fsockopen($host, $port);
 if (is_resource($connection))

@@ -190,7 +190,7 @@ sub defaultpage
 	LOGDEB "Set page title, load header, parse variables, set footer, end";
 	$template_title = $L{'RPIMonitor.MY_NAME'};
 	LoxBerry::Web::lbheader($template_title, $helpurl, $helptemplatefilename);
-	$maintemplate->param( "rpi_monitor_url"		, "http://".$ENV{'HTTP_HOST'}.":".$DPORT."/");
+	$maintemplate->param( "rpi_monitor_url"		, "http://".$ENV{'SERVER_NAME'}.":".$DPORT."/");
 	$maintemplate->param("HTMLPATH" => "/plugins/".$lbpplugindir."/");
 	$maintemplate->param( "VERSION"			, $version);
   $maintemplate->param( "LOGLEVEL" 				, $plugin->{PLUGINDB_LOGLEVEL});

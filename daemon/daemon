@@ -36,6 +36,14 @@ fi
 if [ -r $CONFIGFILE ]
 then
   LOGDEB "LOGLEVEL is $LOGLEVEL"
+  if [ $LOGLEVEL -lt 7 ] 
+  then 
+    echo "RPI Monitor Logging is disabled. Set to Debug to enable."
+	LOGLEVEL=0
+  else
+	LOGLEVEL=5
+	LOGDEB "RPI Monitor LOGLEVEL is $LOGLEVEL"
+  fi
   sed -i -e "s%^#daemon.logfile.*%daemon.logfile=$FILENAME%"   $CONFIGFILE
   sed -i -e "s%^#daemon.loglevel.*%daemon.loglevel=$LOGLEVEL%"   $CONFIGFILE
   sed -i -e "s%^daemon.logfile.*%daemon.logfile=$FILENAME%"   $CONFIGFILE
